@@ -33,9 +33,19 @@ def periodic_kernel(x1, x2, length_scale=1.0, period=24.0, variance=1.0):
     x2 = np.atleast_2d(x2)
 
     #d = np.sum(x1**2, 1).reshape(-1, 1) + np.sum(x2**2, 1) - 2 * np.dot(x1, x2.T)   
-    d = np.linalg.norm(x1[:, None, :] - x2[None, :, :], axis=2) # get distances
+    #d = np.linalg.norm(x1[:, None, :] - x2[None, :, :], axis=2) # get distances
+    
 
-    return variance * np.exp(-2 * (np.sin(np.pi * d / period)**2) / length_scale**2)
+    # Compute Gram matrix
+    K = np.zeros((x1.shape[0], x2.shape[0]))
+    for d in range(x1.shape[1]): # iterate over each feature
+        x1_d = x1[:, d][:, None]
+        x2_d = x2[:, d][None, :]
+
+        d = np.abs(x1_d - x2_d) # absolute dist
+        sin_term = np.sin(np.pi * d / period) ** 2
+        K += -2 * sin_term / length_scale**2 
+    return np.exp(K)
 
 
 def negative_log_marginal_likelihood(X, y, kernel, noise=1e-8, K_lst = None, **kwargs):
