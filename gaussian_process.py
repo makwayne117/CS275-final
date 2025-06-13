@@ -16,7 +16,7 @@ def rbf_kernel(x1, x2, length_scale=1.0, variance=1.0):
     
     return variance * np.exp((-0.5 / length_scale**2) * d)
 
-def matern_kernel(x1, x2, nu=1.5, length_scale=1.0):
+def matern_kernel(x1, x2, nu=1.5, length_scale=1.0, variance = 1.0):
     """Compute the Matern kernel between two vectors x and y."""
     x1 = np.atleast_2d(x1) # ensure proper dimensions
     x2 = np.atleast_2d(x2)
@@ -26,7 +26,7 @@ def matern_kernel(x1, x2, nu=1.5, length_scale=1.0):
 
     factor = np.sqrt(2 * nu) * d / length_scale
     coef = (2 ** (1. - nu)) / gamma(nu)
-    return coef * (factor ** nu) * kv(nu, factor)
+    return variance * coef * (factor ** nu) * kv(nu, factor)
 
 def periodic_kernel(x1, x2, length_scale=1.0, period=24.0, variance=1.0):
     x1 = np.atleast_2d(x1)
@@ -45,7 +45,7 @@ def periodic_kernel(x1, x2, length_scale=1.0, period=24.0, variance=1.0):
         d = np.abs(x1_d - x2_d) # absolute dist
         sin_term = np.sin(np.pi * d / period) ** 2
         K += -2 * sin_term / length_scale**2 
-    return np.exp(K)
+    return variance*np.exp(K)
 
 
 def negative_log_marginal_likelihood(X, y, kernel, noise=1e-8, K_lst = None, **kwargs):
@@ -103,7 +103,7 @@ def rmse(y_true, y_hat):
 
 def mae(y_true, y_hat):
     '''Computes Mean Absolute Error between y_true and y_hat'''
-    return np.sqrt(np.sum(np.abs(y_hat - y_true))/len(y_true))
+    return np.sum(np.abs(y_hat - y_true))/len(y_true)
 
 
 if __name__ == '__main__':
